@@ -544,11 +544,15 @@ static void error1(int mode, const char *fmt, va_list ap)
     } else {
         strcat_printf(buf, sizeof(buf), "tcc: ");
     }
-    if (mode == ERROR_WARN)
+    if (mode == ERROR_WARN) {
+        strcat_printf(buf, sizeof buf, s1->term_warn_s);
         strcat_printf(buf, sizeof(buf), "warning: ");
-    else
+    } else {
+        strcat_printf(buf, sizeof buf, s1->term_err_s);
         strcat_printf(buf, sizeof(buf), "error: ");
+    }
     strcat_vprintf(buf, sizeof(buf), fmt, ap);
+    strcat_printf(buf, sizeof(buf), s1->term_err_e);
     if (!s1 || !s1->error_func) {
         /* default case: stderr */
         if (s1 && s1->output_type == TCC_OUTPUT_PREPROCESS && s1->ppfp == stdout)
@@ -1529,6 +1533,7 @@ enum {
     TCC_OPTION_E,
     TCC_OPTION_MD,
     TCC_OPTION_MF,
+    TCC_OPTION_t,
     TCC_OPTION_x,
     TCC_OPTION_ar,
     TCC_OPTION_impdef
@@ -1593,6 +1598,7 @@ static const TCCOption tcc_options[] = {
     { "E", TCC_OPTION_E, 0},
     { "MD", TCC_OPTION_MD, 0},
     { "MF", TCC_OPTION_MF, TCC_OPTION_HAS_ARG },
+    { "t", TCC_OPTION_t, TCC_OPTION_HAS_ARG },
     { "x", TCC_OPTION_x, TCC_OPTION_HAS_ARG },
     { "ar", TCC_OPTION_ar, 0},
 #ifdef TCC_TARGET_PE
@@ -2012,6 +2018,22 @@ reparse:
         case TCC_OPTION_MF:
             s->deps_outfile = tcc_strdup(optarg);
             break;
+        case TCC_OPTION_t: {
+            s->term_when = *strtok((char *)optarg, ",");
+#ifndef _WIN32
+            if (s->term_when == 'a' && isatty(2))
+                s->term_when = 'A';
+#endif
+            if (!(s->term_err_s = strtok(NULL, ",")))
+                s->term_err_s = "\e[1m";    /* default to ANSI bold */
+            if (!(s->term_err_e = strtok(NULL, ",")))
+                s->term_err_e = "\e[0m";    /* default to ANSI attrs off */
+            if (!(s->term_warn_s = strtok(NULL, ",")))
+                s->term_warn_s = s->term_err_s;
+            if (!(s->term_warn_e = strtok(NULL, ",")))
+                s->term_warn_e = s->term_err_e;
+            break;
+        }
         case TCC_OPTION_dumpversion:
             printf ("%s\n", TCC_VERSION);
             exit(0);

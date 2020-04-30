@@ -390,6 +390,21 @@ Generate makefile fragment with dependencies.
 @item -MF depfile
 Use @file{depfile} as output for -MD.
 
+@item -t [aA?][,ErrorStart,ErrorEnd[,WarningStart,WarningEnd]]
+Terminal highlighting of errors and warnings.  For example, in order
+to render errors in inverse text and warnings bold face on any ANSI or
+vt102-derived terminal use -ta,$'\\e[7m,\\e[0m,\\e[1m' (or enter literal
+escapes if your command shell does not support $'' syntax).
+
+Uppercase \fBA\fR means unconditional use.  Lowercase \fBa\fR engages
+auto-mode, i.e. use Start/End text only if unix isatty() reports that
+stderr is a terminal.
+
+If \fBWarningStart,WarningEnd\fR are omitted, tcc uses the same codes
+as for errors.  tcc uses simple ANSI/vt102 boldface when only a or A
+are given but all codes are omitted.
+
+
 @item -print-search-dirs
 Print the configured installation directory and a list of library
 and include directories tcc will search.

@@ -853,6 +853,8 @@ struct TCCState {
     /* extra attributes (eg. GOT/PLT value) for symtab symbols */
     struct sym_attr *sym_attrs;
     int nb_sym_attrs;
+    /* terminal highlighting state state */
+    char term_when, *term_err_s, *term_err_e, *term_warn_s, *term_warn_e;
     /* ptr to next reloc entry reused */
     ElfW_Rel *qrel;
 #   define qrel s1->qrel
